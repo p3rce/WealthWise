@@ -1,29 +1,15 @@
-<!-- File: app/src/main/res/layout/activity_main.xml -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/textViewTitle"
+        android:id="@+id/helloTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="WealthWise - Monthly Expenses"
+        android:text="Hello, World!"
         android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:layout_centerInParent="true"/>
 
-    <Button
-        android:id="@+id/buttonAddExpense"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add Expense" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewExpenses"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
-
-</LinearLayout>
+</RelativeLayout>
