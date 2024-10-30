@@ -23,6 +23,7 @@
         </activity>
 <!--        <activity android:name=".activities.DashboardActivity"/>-->
         <activity android:name=".activities.ExpenseEntryActivity"/>
+        <activity android:name=".activities.ExpenseListActivity"/>
     </application>
 
 </manifest>

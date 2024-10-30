@@ -1,6 +1,7 @@
 package com.example.wealthwise.database.dao;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -13,6 +14,14 @@ public interface ExpenseDao {
 
     @Insert
     void insert(Expense expense);
+
+
+    @Query("SELECT * FROM expenses")
+    List<Expense> getAllExpenses();
+
+
+    @Delete
+    void delete(Expense expense);
 
 
     @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate")

@@ -28,6 +28,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     private EditText amountEditText;
     private Spinner categorySpinner;
     private Button saveButton;
+    private WealthWiseDatabase database;
 
 
     @Override
@@ -50,6 +51,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         amountEditText = findViewById(R.id.amountEditText);
         categorySpinner = findViewById(R.id.categorySpinner);
         saveButton = findViewById(R.id.saveButton);
+
+        database = WealthWiseDatabase.getDatabase(getApplicationContext());
 
         saveButton.setOnClickListener(v -> saveExpense());
 
@@ -77,6 +80,22 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         String category = categorySpinner.getSelectedItem().toString();
         double amount = Double.parseDouble(amountEditText.getText().toString());
         String date = getCurrentDate();
+
+
+        new Thread(() -> {
+
+            Expense expense = new Expense(category,amount,date);
+            database.expenseDao().insert(expense);
+
+            runOnUiThread(() -> {
+
+                Toast.makeText(this, "Expense added!", Toast.LENGTH_SHORT).show();
+                finish();
+
+            });
+
+        }).start();
+
 
         Expense expense = new Expense(category, amount, date);
         WealthWiseDatabase.getDatabase(getApplicationContext()).expenseDao().insert(expense);
