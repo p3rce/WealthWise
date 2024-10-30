@@ -1,6 +1,8 @@
 package com.example.wealthwise.activities;
 
 import android.os.Bundle;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +27,18 @@ public class ExpenseListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_list);
 
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("All Expenses");
+        }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                    finish();
+            }
+        });
+
         expenseRecyclerView = findViewById(R.id.expenseRecyclerView);
         expenseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -33,6 +47,13 @@ public class ExpenseListActivity extends AppCompatActivity {
 
         loadExpenses();
 
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
 

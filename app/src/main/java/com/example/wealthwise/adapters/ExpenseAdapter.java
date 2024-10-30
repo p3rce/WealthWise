@@ -1,11 +1,18 @@
 package com.example.wealthwise.adapters;
 
+import static android.app.ProgressDialog.show;
+
+import android.app.AlertDialog;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wealthwise.R;
@@ -18,6 +25,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
 
     private List<Expense> expenses;
     private WealthWiseDatabase database;
+    private Context context;
 
 
     public ExpenseAdapter(List<Expense> expenses, WealthWiseDatabase database) {
@@ -26,11 +34,13 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
     }
 
 
-    @NonNull
     @Override
     public ExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_expense, parent, false);
+
+        context = parent.getContext();
+
         return new ExpenseViewHolder(view);
     }
 
@@ -41,12 +51,35 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
         holder.amountTextView.setText(String.valueOf(expense.getAmount()));
         holder.dateTextView.setText(expense.getDate());
 
-        holder.deleteButton.setOnClickListener(v -> {
-            deleteExpense(expense);
-            expenses.remove(position);
-            notifyItemRemoved(position);
-        });
+        holder.deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog(expense, position));
     }
+
+    private void showDeleteConfirmationDialog(Expense expense, int position) {
+
+        new AlertDialog.Builder(context)
+                .setTitle("Delete Expense")
+                .setMessage("Are you sure you want to delete this expense?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    deleteExpense(expense, position);
+                })
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+
+    }
+
+
+    private void deleteExpense(Expense expense, int position) {
+        new Thread(() -> {
+            database.expenseDao().delete(expense);
+            expenses.remove(position);
+            ((AppCompatActivity) context).runOnUiThread(() -> {
+                notifyItemRemoved(position);
+                Toast.makeText(context, "Expense deleted", Toast.LENGTH_SHORT).show();
+            });
+        }).start();
+    }
+
 
     private void deleteExpense(Expense expense) {
         new Thread(() -> database.expenseDao().delete(expense)).start();
