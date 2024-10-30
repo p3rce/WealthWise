@@ -6,7 +6,9 @@ espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
 mpandroidchart = "v3.1.0"
+roomCompiler = "2.4.0"
 roomRuntime = "2.6.1"
+roomRuntimeVersion = "2.4.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -16,7 +18,9 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+room-compiler-v240 = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+room-runtime-v240 = { module = "androidx.room:room-runtime", version.ref = "roomRuntimeVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

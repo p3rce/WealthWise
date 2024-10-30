@@ -1,4 +1,16 @@
 <resources>
     <string name="app_name">WealthWise</string>
 
+
+    <!-- Expense Categories -->
+    <string-array name="expense_categories">
+        <item>Entertainment</item>
+        <item>Transportation</item>
+        <item>Household Expenses</item>
+        <item>Food</item>
+        <item>Utilities</item>
+        <item>Health</item>
+        <item>Other</item>
+    </string-array>
+
 </resources>

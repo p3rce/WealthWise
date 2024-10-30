@@ -41,5 +41,12 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
 
+    implementation (libs.room.runtime.v240)
+    annotationProcessor (libs.room.compiler.v240)
+
+
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+
 
 }
