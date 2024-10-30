@@ -43,7 +43,7 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         addExpenseButton.setOnClickListener(v -> {
-            Toast.makeText(DashboardActivity.this, "Button clicked", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(DashboardActivity.this, "Button clicked", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(DashboardActivity.this, ExpenseEntryActivity.class);
             startActivity(intent);
         });

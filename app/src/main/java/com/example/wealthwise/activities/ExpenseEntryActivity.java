@@ -19,6 +19,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AppCompatActivity;
+
 public class ExpenseEntryActivity extends AppCompatActivity {
 
     private EditText amountEditText;
@@ -30,6 +34,18 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_entry);
+
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Add Expense");
+        }
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        });
 
         amountEditText = findViewById(R.id.amountEditText);
         categorySpinner = findViewById(R.id.categorySpinner);
@@ -45,6 +61,15 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
 
     }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+
 
 
     private void saveExpense() {

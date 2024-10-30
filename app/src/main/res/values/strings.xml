@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">WealthWise</string>
 
+    <!-- App Core Values -->
+    <string name="enter_expense">Enter Expense</string>
+    <string name="category">Category</string>
+    <string name="save_expense">Save Expense</string>
+
 
     <!-- Expense Categories -->
     <string-array name="expense_categories">
