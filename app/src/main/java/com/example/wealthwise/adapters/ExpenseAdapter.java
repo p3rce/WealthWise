@@ -20,20 +20,24 @@ import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder> {
 
     private List<Expense> expenses;
     private WealthWiseDatabase database;
     private Context context;
+    private ExecutorService executorService;
 
 
     public ExpenseAdapter(List<Expense> expenses, WealthWiseDatabase database) {
         this.expenses = expenses;
         this.database = database;
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
-
+    @NonNull
     @Override
     public ExpenseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -70,20 +74,31 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
 
 
     private void deleteExpense(Expense expense, int position) {
-        new Thread(() -> {
+
+        executorService.execute(() -> {
+
             database.expenseDao().delete(expense);
             expenses.remove(position);
+
+
             ((AppCompatActivity) context).runOnUiThread(() -> {
+
                 notifyItemRemoved(position);
-                Toast.makeText(context, "Expense deleted", Toast.LENGTH_SHORT).show();
+                notifyItemRangeChanged(position, expenses.size());
+
+                Toast.makeText(context, "Expense Deleted!", Toast.LENGTH_SHORT).show();
+
             });
-        }).start();
+
+
+        });
+
     }
 
 
-    private void deleteExpense(Expense expense) {
-        new Thread(() -> database.expenseDao().delete(expense)).start();
-    }
+//    private void deleteExpense(Expense expense) {
+//        new Thread(() -> database.expenseDao().delete(expense)).start();
+//    }
 
     @Override
     public int getItemCount() {

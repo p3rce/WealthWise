@@ -1,6 +1,7 @@
 package com.example.wealthwise.activities;
 
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,12 +14,15 @@ import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ExpenseListActivity extends AppCompatActivity {
 
     private RecyclerView expenseRecyclerView;
     private ExpenseAdapter expenseAdapter;
     private WealthWiseDatabase database;
+    private ExecutorService executorService;
 
 
     @Override
@@ -44,6 +48,7 @@ public class ExpenseListActivity extends AppCompatActivity {
 
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
 
+        executorService = Executors.newSingleThreadExecutor();
 
         loadExpenses();
 
@@ -59,15 +64,20 @@ public class ExpenseListActivity extends AppCompatActivity {
 
     private void loadExpenses() {
 
-        new Thread(() -> {
+        executorService.execute(() -> {
             List<Expense> expenses = database.expenseDao().getAllExpenses();
-
             runOnUiThread(() -> {
-                expenseAdapter = new ExpenseAdapter(expenses, database);
-                expenseRecyclerView.setAdapter(expenseAdapter);
+                if (expenses.isEmpty()) {
+//                    noExpensesTextView.setVisibility(View.VISIBLE);
+                    expenseRecyclerView.setVisibility(View.GONE);
+                } else {
+//                    noExpensesTextView.setVisibility(View.GONE);
+                    expenseRecyclerView.setVisibility(View.VISIBLE);
+                    expenseAdapter = new ExpenseAdapter(expenses, database);
+                    expenseRecyclerView.setAdapter(expenseAdapter);
+                }
             });
-
-        }).start();
+        });
 
     }
 

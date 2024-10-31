@@ -18,6 +18,8 @@ import com.example.wealthwise.models.Expense;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 import androidx.activity.OnBackPressedCallback;
@@ -29,6 +31,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     private Spinner categorySpinner;
     private Button saveButton;
     private WealthWiseDatabase database;
+    private ExecutorService executorService;
 
 
     @Override
@@ -54,6 +57,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
 
+        executorService = Executors.newSingleThreadExecutor();
+
         saveButton.setOnClickListener(v -> saveExpense());
 
 
@@ -78,29 +83,34 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     private void saveExpense() {
 
         String category = categorySpinner.getSelectedItem().toString();
-        double amount = Double.parseDouble(amountEditText.getText().toString());
+        double amount;
+        try {
+            amount = Double.parseDouble(amountEditText.getText().toString());
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String date = getCurrentDate();
 
-
-        new Thread(() -> {
-
-            Expense expense = new Expense(category,amount,date);
+        // Execute the database insertion on a background thread
+        executorService.execute(() -> {
+            Expense expense = new Expense(category, amount, date);
             database.expenseDao().insert(expense);
 
+            // Notify on the main thread
             runOnUiThread(() -> {
-
-                Toast.makeText(this, "Expense added!", Toast.LENGTH_SHORT).show();
-                finish();
-
+                Toast.makeText(this, "Expense saved!", Toast.LENGTH_SHORT).show();
+                finish(); // Close the activity and return to DashboardActivity
             });
+        });
 
-        }).start();
+    }
 
-
-        Expense expense = new Expense(category, amount, date);
-        WealthWiseDatabase.getDatabase(getApplicationContext()).expenseDao().insert(expense);
-        Toast.makeText(this, "Expense saved!", Toast.LENGTH_SHORT).show();
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executorService.shutdown();
     }
 
 
