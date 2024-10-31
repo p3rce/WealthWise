@@ -19,6 +19,7 @@ import com.example.wealthwise.R;
 import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +30,8 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
     private WealthWiseDatabase database;
     private Context context;
     private ExecutorService executorService;
+    private static final DecimalFormat decimalFormat = new DecimalFormat("0.##");
+
 
 
     public ExpenseAdapter(List<Expense> expenses, WealthWiseDatabase database) {
@@ -52,10 +55,14 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
     public void onBindViewHolder(@NonNull ExpenseViewHolder holder, int position) {
         Expense expense = expenses.get(position);
         holder.categoryTextView.setText(expense.getCategory());
-        holder.amountTextView.setText(String.valueOf(expense.getAmount()));
+        holder.amountTextView.setText(String.valueOf(formatAmount(expense.getAmount())));
         holder.dateTextView.setText(expense.getDate());
 
         holder.deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog(expense, position));
+    }
+
+    private String formatAmount(double amount) {
+        return "$" + decimalFormat.format(amount);
     }
 
     private void showDeleteConfirmationDialog(Expense expense, int position) {

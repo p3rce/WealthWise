@@ -5,6 +5,7 @@ import android.view.View;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,6 +46,7 @@ public class ExpenseListActivity extends AppCompatActivity {
 
         expenseRecyclerView = findViewById(R.id.expenseRecyclerView);
         expenseRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        expenseRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
 
@@ -83,4 +85,3 @@ public class ExpenseListActivity extends AppCompatActivity {
 
 
 }
-
