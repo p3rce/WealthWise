@@ -1,7 +1,11 @@
 package com.example.wealthwise.activities;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,13 +19,18 @@ import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
+import java.lang.reflect.Type;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +57,8 @@ public class DashboardActivity extends AppCompatActivity {
 
         barChart = findViewById(R.id.barChart);
         loadMonthlySpendingData();
+
+        configurePieChart();
 
 
         addExpenseButton.setOnClickListener(v -> {
@@ -91,71 +102,85 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
 
+    private void configurePieChart() {
+        pieChart.setUsePercentValues(false);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setDrawHoleEnabled(false);
+        pieChart.setEntryLabelTextSize(12f);
+        pieChart.setEntryLabelColor(getResources().getColor(android.R.color.white));
+
+        Legend legend = pieChart.getLegend();
+        legend.setEnabled(false);
+//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+//        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+//        legend.setDrawInside(false);
+//        legend.setTextSize(12f);
+//        legend.setFormSize(12f);
+
+    }
+
+
     private void loadCategoryWiseData() {
-
-
         new Thread(() -> {
-
             List<Expense> expenses = database.expenseDao().getAllExpenses();
             List<PieEntry> entries = new ArrayList<>();
 
-
+            // Aggregate expenses by category
             Map<String, Float> categorySums = new HashMap<>();
-            for(Expense expense : expenses) {
+            for (Expense expense : expenses) {
                 float currentSum = categorySums.getOrDefault(expense.getCategory(), 0f);
                 categorySums.put(expense.getCategory(), currentSum + (float) expense.getAmount());
             }
 
-
-            for(Map.Entry<String, Float> entry : categorySums.entrySet()) {
+            // Convert aggregated data to PieEntry objects
+            for (Map.Entry<String, Float> entry : categorySums.entrySet()) {
                 entries.add(new PieEntry(entry.getValue(), entry.getKey()));
             }
 
-
+            // Update the chart on the main thread
             runOnUiThread(() -> {
-
                 if (entries.isEmpty()) {
-
                     pieChart.clear();
-                    pieChart.setNoDataText("No expenses to show");
-
+                    pieChart.setNoDataText("No expenses available");
                 } else {
-
                     PieDataSet dataSet = new PieDataSet(entries, "Expenses by Category");
+
+                    // Set custom colors
+                    dataSet.setColors(getResources().getColor(R.color.entertainmentColor),
+                            getResources().getColor(R.color.transportationColor),
+                            getResources().getColor(R.color.householdColor),
+                            getResources().getColor(R.color.foodColor),
+                            getResources().getColor(R.color.utilitiesColor),
+                            getResources().getColor(R.color.healthColor),
+                            getResources().getColor(R.color.otherColor));
+
+                    dataSet.setValueTextSize(25f);
+
+                    dataSet.setValueFormatter(new DollarValueFormatter()); // Show percentages for values
+
                     PieData data = new PieData(dataSet);
                     pieChart.setData(data);
-                    pieChart.invalidate();
-
+                    pieChart.invalidate(); // Refresh chart
                 }
-
             });
-
-
         }).start();
+    }
 
 
+    private static class DollarValueFormatter extends ValueFormatter {
+        private final DecimalFormat decimalFormat;
 
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(30f, "Entertainment"));
-        entries.add(new PieEntry(20f, "Transportation"));
-        entries.add(new PieEntry(50f, "Household Expenses"));
-
-        // If entries list is empty, log or handle error
-        if (entries.isEmpty()) {
-            Log.d("PieChart", "No data available to display");
-            return;
+        public DollarValueFormatter() {
+            this.decimalFormat = new DecimalFormat("0.##");
         }
 
 
-        PieDataSet dataSet = new PieDataSet(entries, "Expenses by Category");
-        PieData data = new PieData(dataSet);
-
-        for (PieEntry entry : entries) {
-            Log.d("PieEntry", "Label: " + entry.getLabel() + ", Value: " + entry.getValue());
+        @Override
+        public String getFormattedValue(float value) {
+            // Use HTML to make the text bold
+            return "$" + decimalFormat.format(value);
         }
-
-        pieChart.setData(data);
-        pieChart.invalidate();
 
     }
 

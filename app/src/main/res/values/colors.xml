@@ -7,4 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Define colors for chart sections -->
+    <!-- Define colors for chart sections -->
+    <color name="entertainmentColor">#FF6F61</color>
+    <color name="transportationColor">#6B8E23</color>
+    <color name="householdColor">#4682B4</color>
+    <color name="foodColor">#FFB347</color>
+    <color name="utilitiesColor">#9370DB</color>
+    <color name="healthColor">#FF6347</color>
+    <color name="otherColor">#A9A9A9</color>
+
 </resources>
