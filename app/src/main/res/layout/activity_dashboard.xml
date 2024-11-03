@@ -1,41 +1,41 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <LinearLayout
+        android:id="@+id/chartContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Button to add a new expense -->
         <Button
             android:id="@+id/addExpenseButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add New Expense" />
+            android:text="Add Expense" />
+
+        <!-- Button to view all expenses -->
+
+        <!-- Placeholder for multiple charts -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart1"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp" />
 
         <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
+            android:id="@+id/pieChart2"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            tools:ignore="MissingConstraints">
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp" />
 
-            <ListView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </com.github.mikephil.charting.charts.PieChart>
-
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart3"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            tools:ignore="MissingConstraints" />
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp" />
+
     </LinearLayout>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
