@@ -3,6 +3,16 @@
 
     <item
         android:id="@+id/action_view_expenses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@android:drawable/ic_menu_recent_history"
         android:title="View Expenses"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_view_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="App Info"
+        app:showAsAction="always" />
 </menu>
