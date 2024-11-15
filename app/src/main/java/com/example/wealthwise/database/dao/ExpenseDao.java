@@ -5,7 +5,10 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
+import com.example.wealthwise.models.CategoryTotal;
 import com.example.wealthwise.models.Expense;
+import com.example.wealthwise.models.MonthlyTotal;
+import com.example.wealthwise.models.WeeklyTotal;
 
 import java.util.List;
 
@@ -24,10 +27,16 @@ public interface ExpenseDao {
     void delete(Expense expense);
 
 
-    @Query("SELECT * FROM expenses WHERE date BETWEEN :startDate AND :endDate")
-    List<Expense> getExpensesByMonth(String startDate, String endDate);
+    // Get the total amount spent per category for the current month
+    @Query("SELECT category, SUM(amount) as total FROM expenses WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now') GROUP BY category")
+    List<CategoryTotal> getCategoryWiseTotal();
 
-    @Query("SELECT SUM(amount) FROM expenses WHERE category = :category AND date BETWEEN :startDate AND :endDate")
-    double getTotalByCategory(String category, String startDate, String endDate);
+    // Get the total amount spent per week for the current month
+    @Query("SELECT strftime('%W', date) as week, SUM(amount) as total FROM expenses WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now') GROUP BY week")
+    List<WeeklyTotal> getWeeklyTotal();
+
+    // Get the total amount spent per month for the current year
+    @Query("SELECT strftime('%m', date) as month, SUM(amount) as total FROM expenses WHERE strftime('%Y', date) = strftime('%Y', 'now') GROUP BY month")
+    List<MonthlyTotal> getMonthlyTotal();
 
 }

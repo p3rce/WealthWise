@@ -34,6 +34,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
 
 
 
+
     public ExpenseAdapter(List<Expense> expenses, WealthWiseDatabase database) {
         this.expenses = expenses;
         this.database = database;
@@ -102,18 +103,10 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.ExpenseV
 
     }
 
-
-//    private void deleteExpense(Expense expense) {
-//        new Thread(() -> database.expenseDao().delete(expense)).start();
-//    }
-
     @Override
     public int getItemCount() {
         return expenses.size();
     }
-
-
-
 
 
     public static class ExpenseViewHolder extends RecyclerView.ViewHolder {

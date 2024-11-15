@@ -32,23 +32,20 @@
 
         <!-- Placeholder for multiple charts -->
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart1"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="400dp"
             android:layout_marginTop="16dp" />
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart2"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="16dp" />
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart3"
+        <!-- TabLayout as page indicator for ViewPager2 -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="16dp" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+
 
     </LinearLayout>
 </ScrollView>

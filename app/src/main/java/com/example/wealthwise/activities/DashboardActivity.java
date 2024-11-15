@@ -6,19 +6,29 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.wealthwise.R;
+import com.example.wealthwise.adapters.ChartPagerAdapter;
 import com.example.wealthwise.database.WealthWiseDatabase;
+import com.example.wealthwise.models.CategoryTotal;
 import com.example.wealthwise.models.Expense;
+import com.example.wealthwise.models.MonthlyTotal;
+import com.example.wealthwise.models.WeeklyTotal;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,39 +39,33 @@ import java.util.Locale;
 import java.util.Map;
 
 public class DashboardActivity extends AppCompatActivity {
-    private PieChart pieChart1, pieChart2, pieChart3;
     private Button addExpenseButton, viewAllExpensesButton;
     private WealthWiseDatabase database;
     private TextView totalAmountTextView;
+    private ViewPager2 viewPager;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_dashboard);  // Ensure this is called first
 
-        pieChart1 = findViewById(R.id.pieChart1);
-        pieChart2 = findViewById(R.id.pieChart2);
-        pieChart3 = findViewById(R.id.pieChart3);
-        addExpenseButton = findViewById(R.id.addExpenseButton);
-//        viewAllExpensesButton = findViewById(R.id.viewAllExpensesButton);
+        // Initialize all views after setting the content view
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
         totalAmountTextView = findViewById(R.id.totalAmountTextView);
+        addExpenseButton = findViewById(R.id.addExpenseButton);
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
 
-        configurePieChart(pieChart1);
-        configurePieChart(pieChart2);
-        configurePieChart(pieChart3);
-
-        // Add Expense button click action
         addExpenseButton.setOnClickListener(v -> {
             Intent intent = new Intent(DashboardActivity.this, ExpenseEntryActivity.class);
             startActivity(intent);
         });
 
-        // View All Expenses button click action
-//        viewAllExpensesButton.setOnClickListener(v -> {
-//            Intent intent = new Intent(DashboardActivity.this, ExpenseListActivity.class);
-//            startActivity(intent);
-//        });
+
+        loadChartData();
+
+
     }
 
     @Override
@@ -95,9 +99,62 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadChartData(); // Refresh chart data when returning to this activity
         calculateTotalAmountSpentThisMonth();
+        loadChartData();
     }
+
+
+    private void loadChartData() {
+
+        new Thread(() -> {
+
+            List<PieEntry> categoryData = getCategoryData();
+            List<PieEntry> weeklyData = getWeeklyData();
+            List<PieEntry> monthlyData = getMonthlyData();
+
+            runOnUiThread(() -> {
+                ChartPagerAdapter adapter = new ChartPagerAdapter(this, categoryData, weeklyData, monthlyData);
+                viewPager.setAdapter(adapter);
+
+                new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+
+                }).attach();
+
+            });
+
+        }).start();
+
+    }
+
+
+    private List<PieEntry> getCategoryData() {
+        List<CategoryTotal> categoryTotals = database.expenseDao().getCategoryWiseTotal();
+        List<PieEntry> entries = new ArrayList<>();
+        for (CategoryTotal categoryTotal : categoryTotals) {
+            entries.add(new PieEntry((float) categoryTotal.total, categoryTotal.category));
+        }
+        return entries;
+    }
+
+    private List<PieEntry> getWeeklyData() {
+        List<WeeklyTotal> weeklyTotals = database.expenseDao().getWeeklyTotal();
+        List<PieEntry> entries = new ArrayList<>();
+        for (WeeklyTotal weeklyTotal : weeklyTotals) {
+            entries.add(new PieEntry((float) weeklyTotal.total, "Week " + weeklyTotal.week));
+        }
+        return entries;
+    }
+
+    private List<PieEntry> getMonthlyData() {
+        List<MonthlyTotal> monthlyTotals = database.expenseDao().getMonthlyTotal();
+        List<PieEntry> entries = new ArrayList<>();
+        for (MonthlyTotal monthlyTotal : monthlyTotals) {
+            String monthName = getMonthName(monthlyTotal.month);
+            entries.add(new PieEntry((float) monthlyTotal.total, monthName));
+        }
+        return entries;
+    }
+
 
 
 
@@ -158,93 +215,18 @@ public class DashboardActivity extends AppCompatActivity {
 
     }
 
+    private String getMonthName(String monthNumber) {
+        String[] months = {"January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"};
+        int monthIndex = Integer.parseInt(monthNumber) - 1;
+        return (monthIndex >= 0 && monthIndex < 12) ? months[monthIndex] : "Unknown";
+    }
+
     private void displayTotalAmount(double amount) {
         DecimalFormat decimalFormat = new DecimalFormat("0.##");
         String formattedAmount = "$" + decimalFormat.format(amount);
 
         totalAmountTextView.setText("Total Amount Spent This Month: " + formattedAmount);
-    }
-
-    private void configurePieChart(PieChart pieChart) {
-        pieChart.setUsePercentValues(false);
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setDrawHoleEnabled(false);
-        pieChart.setEntryLabelTextSize(14f);
-        pieChart.setEntryLabelColor(getResources().getColor(android.R.color.white));
-
-        // Remove the legend (bottom labels)
-        Legend legend = pieChart.getLegend();
-        legend.setEnabled(false);
-    }
-
-    private void loadChartData() {
-        // Load data for each chart
-        loadCategoryWiseData(pieChart1);
-        loadWeeklyData(pieChart2);
-        loadMonthlyData(pieChart3);
-    }
-
-    private void loadCategoryWiseData(PieChart pieChart) {
-        new Thread(() -> {
-            List<Expense> expenses = database.expenseDao().getAllExpenses();
-            List<PieEntry> entries = new ArrayList<>();
-
-            Map<String, Float> categorySums = new HashMap<>();
-            for (Expense expense : expenses) {
-                float currentSum = categorySums.getOrDefault(expense.getCategory(), 0f);
-                categorySums.put(expense.getCategory(), currentSum + (float) expense.getAmount());
-            }
-
-            for (Map.Entry<String, Float> entry : categorySums.entrySet()) {
-                entries.add(new PieEntry(entry.getValue(), entry.getKey()));
-            }
-
-            runOnUiThread(() -> updatePieChart(pieChart, entries));
-        }).start();
-    }
-
-    private void loadWeeklyData(PieChart pieChart) {
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(150f, "Week 1"));
-        entries.add(new PieEntry(200f, "Week 2"));
-        entries.add(new PieEntry(180f, "Week 3"));
-        entries.add(new PieEntry(220f, "Week 4"));
-
-        updatePieChart(pieChart, entries);
-    }
-
-    private void loadMonthlyData(PieChart pieChart) {
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(500f, "January"));
-        entries.add(new PieEntry(750f, "February"));
-        entries.add(new PieEntry(620f, "March"));
-
-        updatePieChart(pieChart, entries);
-    }
-
-    private void updatePieChart(PieChart pieChart, List<PieEntry> entries) {
-        if (entries.isEmpty()) {
-            pieChart.clear();
-            pieChart.setNoDataText("No data available");
-        } else {
-            PieDataSet dataSet = new PieDataSet(entries, null);
-
-            dataSet.setColors(getResources().getColor(R.color.entertainmentColor),
-                    getResources().getColor(R.color.transportationColor),
-                    getResources().getColor(R.color.householdColor),
-                    getResources().getColor(R.color.foodColor),
-                    getResources().getColor(R.color.utilitiesColor),
-                    getResources().getColor(R.color.healthColor),
-                    getResources().getColor(R.color.otherColor));
-
-            dataSet.setValueTextSize(16f);
-            dataSet.setValueTextColor(getResources().getColor(android.R.color.white));
-            dataSet.setValueFormatter(new DollarValueFormatter());
-
-            PieData data = new PieData(dataSet);
-            pieChart.setData(data);
-            pieChart.invalidate(); // Refresh chart
-        }
     }
 
     private static class DollarValueFormatter extends ValueFormatter {
@@ -259,4 +241,9 @@ public class DashboardActivity extends AppCompatActivity {
             return "$" + decimalFormat.format(value);
         }
     }
+
+
+
+
+
 }
