@@ -13,13 +13,11 @@ import java.util.List;
 public class ChartPagerAdapter extends FragmentStateAdapter {
 
     private final List<PieEntry> categoryData;
-    private final List<PieEntry> weeklyData;
     private final List<PieEntry> monthlyData;
 
-    public ChartPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<PieEntry> categoryData, List<PieEntry> weeklyData, List<PieEntry> monthlyData) {
+    public ChartPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<PieEntry> categoryData, List<PieEntry> monthlyData) {
         super(fragmentActivity);
         this.categoryData = categoryData;
-        this.weeklyData = weeklyData;
         this.monthlyData = monthlyData;
     }
 
@@ -30,16 +28,14 @@ public class ChartPagerAdapter extends FragmentStateAdapter {
             case 0:
                 return ChartFragment.newInstance("Category-wise Expenses", categoryData);
             case 1:
-                return ChartFragment.newInstance("Weekly Expenses", weeklyData);
-            case 2:
                 return ChartFragment.newInstance("Monthly Overview", monthlyData);
             default:
-                return ChartFragment.newInstance("Chart", categoryData);
+                throw new IllegalArgumentException("Invalid position");
         }
     }
 
     @Override
     public int getItemCount() {
-        return 3; // Number of charts
+        return 2; // Number of charts
     }
 }

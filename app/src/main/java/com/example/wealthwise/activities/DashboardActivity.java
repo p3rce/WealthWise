@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.wealthwise.R;
+import com.example.wealthwise.adapters.AdvicePageAdapter;
 import com.example.wealthwise.adapters.ChartPagerAdapter;
 import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.CategoryTotal;
@@ -33,6 +34,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +45,7 @@ public class DashboardActivity extends AppCompatActivity {
     private Button addExpenseButton, viewAllExpensesButton;
     private WealthWiseDatabase database;
     private TextView totalAmountTextView;
-    private ViewPager2 viewPager;
+    private ViewPager2 viewPager, aiAdvicePager;
     private TabLayout tabLayout;
 
     @Override
@@ -56,6 +59,7 @@ public class DashboardActivity extends AppCompatActivity {
         addExpenseButton = findViewById(R.id.addExpenseButton);
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
+        aiAdvicePager = findViewById(R.id.aiAdvicePager);
 
         addExpenseButton.setOnClickListener(v -> {
             Intent intent = new Intent(DashboardActivity.this, ExpenseEntryActivity.class);
@@ -64,6 +68,10 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         loadChartData();
+
+
+        aiAdvicePager.setUserInputEnabled(false);
+        startAdviceAutoCycle();
 
 
     }
@@ -109,14 +117,23 @@ public class DashboardActivity extends AppCompatActivity {
         new Thread(() -> {
 
             List<PieEntry> categoryData = getCategoryData();
-            List<PieEntry> weeklyData = getWeeklyData();
             List<PieEntry> monthlyData = getMonthlyData();
 
             runOnUiThread(() -> {
-                ChartPagerAdapter adapter = new ChartPagerAdapter(this, categoryData, weeklyData, monthlyData);
+                ChartPagerAdapter adapter = new ChartPagerAdapter(this, categoryData, monthlyData);
                 viewPager.setAdapter(adapter);
 
                 new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+
+                    switch (position) {
+                        case 0:
+                            tab.setText("By-Category");
+                            break;
+
+                        case 1:
+                            tab.setText("By-Month");
+                            break;
+                    }
 
                 }).attach();
 
@@ -133,6 +150,8 @@ public class DashboardActivity extends AppCompatActivity {
         for (CategoryTotal categoryTotal : categoryTotals) {
             entries.add(new PieEntry((float) categoryTotal.total, categoryTotal.category));
         }
+
+        updateAIAdvice(entries);
         return entries;
     }
 
@@ -155,6 +174,83 @@ public class DashboardActivity extends AppCompatActivity {
         return entries;
     }
 
+
+
+
+    private void updateAIAdvice(List<PieEntry> entries) {
+        if (entries.isEmpty()) return;
+
+        // Sort entries by expense amount to find the top category
+        Collections.sort(entries, (entry1, entry2) -> Float.compare(entry2.getValue(), entry1.getValue()));
+        String topCategory = entries.get(0).getLabel();
+
+        // Generate advice based on the highest expense category
+        List<String> adviceList = generateAdviceForCategory(topCategory);
+
+        // Ensure UI updates are done on the main thread
+        runOnUiThread(() -> {
+            AdvicePageAdapter adviceAdapter = new AdvicePageAdapter(this, adviceList);
+            aiAdvicePager.setAdapter(adviceAdapter);
+        });
+    }
+
+
+
+
+    private List<String> generateAdviceForCategory(String category) {
+
+        List<String> adviceList = new ArrayList<>();
+        switch (category) {
+
+            case "Transportation":
+                adviceList.add("Consider using public transit to save on fuel.");
+                adviceList.add("Try carpooling to reduce expenses on transportation.");
+                adviceList.add("Walk or bike for short trips to save money.");
+                break;
+
+            case "Food":
+                adviceList.add("Prepare meals at home instead of dining out.");
+                adviceList.add("Consider buying in bulk to save on groceries.");
+                adviceList.add("Limit takeout meals to cut down on food expenses.");
+                break;
+            case "Entertainment":
+                adviceList.add("Look for free or low-cost entertainment options.");
+                adviceList.add("Limit subscriptions and memberships to save money.");
+                adviceList.add("Plan home movie nights instead of going to the cinema.");
+                break;
+
+            default:
+                adviceList.add("Analyze your spending habits to identify savings.");
+                adviceList.add("Set a monthly budget and track your expenses.");
+                break;
+
+        }
+
+
+        return adviceList;
+
+    }
+
+
+    private void startAdviceAutoCycle() {
+
+        aiAdvicePager.post(new Runnable() {
+            int currentPage = 0;
+
+            @Override
+            public void run() {
+
+                int itemCount = aiAdvicePager.getAdapter().getItemCount();
+                if(itemCount > 0) {
+                    currentPage = (currentPage + 1) % itemCount;
+                    aiAdvicePager.setCurrentItem(currentPage, true);
+                }
+                aiAdvicePager.postDelayed(this, 5000);
+
+            }
+        });
+
+    }
 
 
 

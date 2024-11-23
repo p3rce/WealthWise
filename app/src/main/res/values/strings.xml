@@ -11,7 +11,7 @@
     <string-array name="expense_categories">
         <item>Entertainment</item>
         <item>Transportation</item>
-        <item>Household Expenses</item>
+        <item>Household</item>
         <item>Food</item>
         <item>Utilities</item>
         <item>Health</item>

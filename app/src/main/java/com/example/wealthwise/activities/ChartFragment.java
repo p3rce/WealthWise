@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.wealthwise.R;
+import com.example.wealthwise.utils.DollarValueFormatter;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
@@ -95,7 +96,7 @@ public class ChartFragment extends Fragment {
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         dataSet.setValueTextSize(14f);
         dataSet.setValueTextColor(getResources().getColor(android.R.color.white));
-
+        dataSet.setValueFormatter(new DollarValueFormatter());
 
         PieData data = new PieData(dataSet);
         pieChart.setData(data);

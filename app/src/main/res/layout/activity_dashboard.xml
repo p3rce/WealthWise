@@ -47,5 +47,17 @@
             android:layout_gravity="center_horizontal"/>
 
 
+
+        <!-- AI Advice Bar (ViewPager2 for cycling advice) -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/aiAdvicePager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clipToPadding="false"
+            android:padding="16dp"
+            android:background="@color/light_grey"/>
+
+
     </LinearLayout>
 </ScrollView>
