@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.wealthwise.activities.AdviceFragment;
+import com.example.wealthwise.fragments.AdviceFragment;
 
 import java.util.List;
 

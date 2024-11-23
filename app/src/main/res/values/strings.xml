@@ -15,7 +15,8 @@
         <item>Food</item>
         <item>Utilities</item>
         <item>Health</item>
-        <item>Other</item>
+        <item>Travel</item>
+        <item>Shopping</item>
     </string-array>
 
 </resources>

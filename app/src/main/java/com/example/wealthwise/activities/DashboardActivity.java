@@ -55,7 +55,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Initialize all views after setting the content view
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
-        totalAmountTextView = findViewById(R.id.totalAmountTextView);
+//        totalAmountTextView = findViewById(R.id.totalAmountTextView);
         addExpenseButton = findViewById(R.id.addExpenseButton);
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
@@ -107,7 +107,7 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        calculateTotalAmountSpentThisMonth();
+//        calculateTotalAmountSpentThisMonth();
         loadChartData();
     }
 
@@ -178,21 +178,30 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     private void updateAIAdvice(List<PieEntry> entries) {
-        if (entries.isEmpty()) return;
+        List<String> adviceList;
 
-        // Sort entries by expense amount to find the top category
-        Collections.sort(entries, (entry1, entry2) -> Float.compare(entry2.getValue(), entry1.getValue()));
-        String topCategory = entries.get(0).getLabel();
+        if (entries.isEmpty()) {
+            // No expenses are loaded, use default advice
+            adviceList = generateAdviceForCategory("default");
+        } else {
+            // Sort entries by expense amount to find the top category
+            entries.sort((entry1, entry2) -> Float.compare(entry2.getValue(), entry1.getValue()));
+            String topCategory = entries.get(0).getLabel();
 
-        // Generate advice based on the highest expense category
-        List<String> adviceList = generateAdviceForCategory(topCategory);
+            // Generate advice based on the highest expense category
+            adviceList = generateAdviceForCategory(topCategory);
+        }
 
-        // Ensure UI updates are done on the main thread
+        // Set adapter on the main thread
         runOnUiThread(() -> {
             AdvicePageAdapter adviceAdapter = new AdvicePageAdapter(this, adviceList);
             aiAdvicePager.setAdapter(adviceAdapter);
+
+            // Start auto-cycle only after adapter is set
+            startAdviceAutoCycle();
         });
     }
+
 
 
 
@@ -219,9 +228,46 @@ public class DashboardActivity extends AppCompatActivity {
                 adviceList.add("Plan home movie nights instead of going to the cinema.");
                 break;
 
+            case "Utilities":
+                adviceList.add("Turn off lights and electronics when not in use.");
+                adviceList.add("Switch to energy-efficient appliances to lower utility bills.");
+                adviceList.add("Use programmable thermostats to optimize heating and cooling.");
+                adviceList.add("Consider bundling services (e.g., internet and phone) for discounts.");
+                break;
+
+            case "Household Expenses":
+                adviceList.add("Shop for generic brands to save on household supplies.");
+                adviceList.add("Take advantage of sales and coupons for big savings.");
+                adviceList.add("Avoid impulse buys by creating a shopping list and sticking to it.");
+                adviceList.add("Reuse and recycle items where possible to reduce spending.");
+                break;
+
+            case "Health":
+                adviceList.add("Explore fitness apps or community resources for free workouts.");
+                adviceList.add("Look for discounts on medications or use generics when available.");
+                adviceList.add("Schedule preventive care visits to avoid costly treatments later.");
+                adviceList.add("Consider switching to an insurance plan that better fits your needs.");
+                break;
+
+            case "Travel":
+                adviceList.add("Book flights and accommodations in advance for better deals.");
+                adviceList.add("Travel during off-peak times to save on expenses.");
+                adviceList.add("Use loyalty programs or credit card rewards for discounts.");
+                adviceList.add("Consider local or budget-friendly destinations for vacations.");
+                break;
+
+            case "Shopping":
+                adviceList.add("Wait for sales events like Black Friday or end-of-season sales.");
+                adviceList.add("Compare prices online before making purchases.");
+                adviceList.add("Limit non-essential shopping to reduce impulsive expenses.");
+                adviceList.add("Use cashback or rewards programs for extra savings.");
+                break;
+
             default:
-                adviceList.add("Analyze your spending habits to identify savings.");
-                adviceList.add("Set a monthly budget and track your expenses.");
+                adviceList.add("Analyze your spending habits to identify savings opportunities.");
+                adviceList.add("Set a monthly budget and track your expenses regularly.");
+                adviceList.add("Avoid unnecessary purchases by prioritizing needs over wants.");
+                adviceList.add("Look for ways to reduce subscriptions or recurring expenses.");
                 break;
 
         }
@@ -233,24 +279,24 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     private void startAdviceAutoCycle() {
-
         aiAdvicePager.post(new Runnable() {
             int currentPage = 0;
 
             @Override
             public void run() {
-
-                int itemCount = aiAdvicePager.getAdapter().getItemCount();
-                if(itemCount > 0) {
-                    currentPage = (currentPage + 1) % itemCount;
-                    aiAdvicePager.setCurrentItem(currentPage, true);
+                // Ensure adapter is set before accessing it
+                if (aiAdvicePager.getAdapter() != null) {
+                    int itemCount = aiAdvicePager.getAdapter().getItemCount();
+                    if (itemCount > 0) {
+                        currentPage = (currentPage + 1) % itemCount;
+                        aiAdvicePager.setCurrentItem(currentPage, true); // Smooth scroll to next item
+                    }
                 }
-                aiAdvicePager.postDelayed(this, 5000);
-
+                aiAdvicePager.postDelayed(this, 5000); // Change advice every 5 seconds
             }
         });
-
     }
+
 
 
 

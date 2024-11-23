@@ -1,4 +1,4 @@
-package com.example.wealthwise.activities;
+package com.example.wealthwise.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

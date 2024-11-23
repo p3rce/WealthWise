@@ -5,7 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.wealthwise.activities.ChartFragment;
+import com.example.wealthwise.fragments.ChartFragment;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.List;

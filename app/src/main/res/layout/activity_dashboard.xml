@@ -10,15 +10,6 @@
         android:padding="16dp">
 
         <!-- Total Amount Spent TextView -->
-        <TextView
-            android:id="@+id/totalAmountTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Total Amount Spent This Month: $0.00"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:padding="8dp"
-            android:gravity="center"/>
 
 
         <!-- Button to add a new expense -->
@@ -54,9 +45,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:background="@color/light_grey"
             android:clipToPadding="false"
             android:padding="16dp"
-            android:background="@color/light_grey"/>
+            android:theme="@style/Theme.WealthWise" />
 
 
     </LinearLayout>
