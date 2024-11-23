@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -25,99 +26,165 @@ import java.util.concurrent.Executors;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.example.wealthwise.database.WealthWiseDatabase;
+import com.example.wealthwise.models.Expense;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.HashMap;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.example.wealthwise.database.WealthWiseDatabase;
+import com.example.wealthwise.models.Expense;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.HashMap;
+
 public class ExpenseEntryActivity extends AppCompatActivity {
 
-    private EditText amountEditText;
-    private Spinner categorySpinner;
-    private Button saveButton;
+    private String selectedCategory = null; // Holds the selected category
+    private CardView currentlySelectedCard = null; // Tracks the currently selected card
+    private TextInputEditText expenseAmountEditText;
     private WealthWiseDatabase database;
-    private ExecutorService executorService;
-
+    private HashMap<String, CardView> categoryCards = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_entry);
 
-        if(getSupportActionBar() != null) {
+        database = WealthWiseDatabase.getDatabase(this); // Initialize the database
+        expenseAmountEditText = findViewById(R.id.expenseAmount);
+
+        // Initialize category selection
+        setupCategorySelection();
+
+        // Submit Button Logic
+        findViewById(R.id.submitExpense).setOnClickListener(v -> {
+            if (validateInput()) {
+                addExpenseToDatabase();
+            }
+        });
+
+
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Add Expense");
         }
 
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                finish();
-            }
-        });
-
-        amountEditText = findViewById(R.id.amountEditText);
-        categorySpinner = findViewById(R.id.categorySpinner);
-        saveButton = findViewById(R.id.saveButton);
-
-        database = WealthWiseDatabase.getDatabase(getApplicationContext());
-
-        executorService = Executors.newSingleThreadExecutor();
-
-        saveButton.setOnClickListener(v -> saveExpense());
-
-
-        ArrayAdapter<CharSequence>adapter = ArrayAdapter.createFromResource(this, R.array.expense_categories, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
-
-        categorySpinner.setAdapter(adapter);
-
 
     }
 
 
     @Override
-    public boolean onSupportNavigateUp() {
-        finish();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Go back to the previous activity
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void setupCategorySelection() {
+        categoryCards.put("Transportation", findViewById(R.id.transportationCard));
+        categoryCards.put("Food", findViewById(R.id.foodCard));
+        categoryCards.put("Entertainment", findViewById(R.id.entertainmentCard));
+        categoryCards.put("Utilities", findViewById(R.id.utilitiesCard));
+        categoryCards.put("Household Expenses", findViewById(R.id.householdExpensesCard));
+        categoryCards.put("Health", findViewById(R.id.healthCard));
+        categoryCards.put("Travel", findViewById(R.id.travelCard));
+        categoryCards.put("Shopping", findViewById(R.id.shoppingCard));
+        // Add more categories as needed
+
+        for (String category : categoryCards.keySet()) {
+            CardView cardView = categoryCards.get(category);
+            cardView.setOnClickListener(v -> toggleCategorySelection(category, cardView));
+        }
+    }
+
+
+    private void toggleCategorySelection(String category, CardView selectedCard) {
+        if (currentlySelectedCard == selectedCard) {
+            // Deselect the card if it's already selected
+            deselectCurrentCategory();
+        } else {
+            // Select a new category
+            selectCategory(category, selectedCard);
+        }
+    }
+
+
+    private void selectCategory(String category, CardView selectedCard) {
+        deselectCurrentCategory(); // Reset any previously selected card
+
+        selectedCard.setCardBackgroundColor(getResources().getColor(R.color.light_grey)); // Highlight selected card
+        selectedCategory = category;
+        currentlySelectedCard = selectedCard;
+    }
+
+
+    private void deselectCurrentCategory() {
+        if (currentlySelectedCard != null) {
+            currentlySelectedCard.setCardBackgroundColor(getResources().getColor(R.color.white));
+            currentlySelectedCard = null;
+        }
+        selectedCategory = null;
+    }
+
+
+    private boolean validateInput() {
+        String amountText = expenseAmountEditText.getText().toString().trim();
+
+        if (amountText.isEmpty()) {
+            Toast.makeText(this, "Please enter an expense amount", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (selectedCategory == null) {
+            Toast.makeText(this, "Please select an expense category", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
         return true;
     }
 
 
+    private void addExpenseToDatabase() {
+        String amountText = expenseAmountEditText.getText().toString().trim();
+        float amount = Float.parseFloat(amountText);
 
+        // Get the current date
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-    private void saveExpense() {
+        // Create a new expense object using the default constructor
+        Expense expense = new Expense();
+        expense.setAmount(amount);
+        expense.setCategory(selectedCategory);
+        expense.setDate(currentDate);
 
-        String category = categorySpinner.getSelectedItem().toString();
-        double amount;
-        try {
-            amount = Double.parseDouble(amountEditText.getText().toString());
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String date = getCurrentDate();
-
-        // Execute the database insertion on a background thread
-        executorService.execute(() -> {
-            Expense expense = new Expense(category, amount, date);
+        // Insert into the database
+        new Thread(() -> {
             database.expenseDao().insert(expense);
 
-            // Notify on the main thread
             runOnUiThread(() -> {
-                Toast.makeText(this, "Expense saved!", Toast.LENGTH_SHORT).show();
-                finish(); // Close the activity and return to DashboardActivity
+                Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show();
+                finish(); // Close the activity after successful submission
             });
-        });
-
+        }).start();
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        executorService.shutdown();
-    }
-
-
-    private String getCurrentDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return dateFormat.format(new Date());
-    }
-
-
 }
+

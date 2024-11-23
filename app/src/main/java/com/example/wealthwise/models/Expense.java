@@ -15,6 +15,7 @@ public class Expense {
     private String date;
 
 
+    public Expense() {}
 
     public Expense(String category, double amount, String date) {
         this.category = category;
