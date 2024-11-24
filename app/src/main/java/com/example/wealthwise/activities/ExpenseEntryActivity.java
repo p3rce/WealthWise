@@ -1,5 +1,6 @@
 package com.example.wealthwise.activities;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -52,11 +53,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.HashMap;
+import java.util.Calendar;
 
 public class ExpenseEntryActivity extends AppCompatActivity {
 
     private String selectedCategory = null; // Holds the selected category
     private CardView currentlySelectedCard = null; // Tracks the currently selected card
+    private Button selectDateButton;
+    private String selectedDate;
     private TextInputEditText expenseAmountEditText;
     private WealthWiseDatabase database;
     private HashMap<String, CardView> categoryCards = new HashMap<>();
@@ -68,9 +72,17 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
         database = WealthWiseDatabase.getDatabase(this); // Initialize the database
         expenseAmountEditText = findViewById(R.id.expenseAmount);
+        selectDateButton = findViewById(R.id.selectDateButton);
 
         // Initialize category selection
         setupCategorySelection();
+
+        // Set default date to today
+        selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
+        selectDateButton.setText(selectedDate);
+
+        // Open Date Picker when the button is clicked
+        selectDateButton.setOnClickListener(v -> showDatePickerDialog());
 
         // Submit Button Logic
         findViewById(R.id.submitExpense).setOnClickListener(v -> {
@@ -96,6 +108,24 @@ public class ExpenseEntryActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDatePickerDialog() {
+        final Calendar calendar = Calendar.getInstance();
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> {
+                    // Update selectedDate with the chosen date
+                    calendar.set(year, month, dayOfMonth);
+                    selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
+                    selectDateButton.setText(selectedDate); // Update the button text
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
     }
 
 
@@ -168,13 +198,12 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         float amount = Float.parseFloat(amountText);
 
         // Get the current date
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
         // Create a new expense object using the default constructor
         Expense expense = new Expense();
         expense.setAmount(amount);
         expense.setCategory(selectedCategory);
-        expense.setDate(currentDate);
+        expense.setDate(selectedDate);
 
         // Insert into the database
         new Thread(() -> {

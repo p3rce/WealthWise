@@ -215,7 +215,30 @@
 
         </GridLayout>
 
+        <!-- Date Picker -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="18dp" />
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date of Expense:"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/selectDateButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Date" />
+
+
         <!-- Submit Button -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="18dp" />
+
         <Button
             android:id="@+id/submitExpense"
             android:layout_width="match_parent"
