@@ -40,6 +40,7 @@
 
 
         <!-- AI Advice Bar (ViewPager2 for cycling advice) -->
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/aiAdvicePager"
             android:layout_width="match_parent"

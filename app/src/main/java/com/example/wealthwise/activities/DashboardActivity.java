@@ -71,7 +71,7 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         aiAdvicePager.setUserInputEnabled(false);
-        startAdviceAutoCycle();
+//        startAdviceAutoCycle();
 
 
     }
@@ -212,9 +212,9 @@ public class DashboardActivity extends AppCompatActivity {
         switch (category) {
 
             case "Transportation":
-                adviceList.add("Consider using public transit to save on fuel.");
-                adviceList.add("Try carpooling to reduce expenses on transportation.");
-                adviceList.add("Walk or bike for short trips to save money.");
+                adviceList.add("Consider using public transit to save fuel.");
+                adviceList.add("Try carpooling to reduce expenses.");
+                adviceList.add("Walk or bike to save money.");
                 break;
 
             case "Food":
