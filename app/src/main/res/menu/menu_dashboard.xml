@@ -15,4 +15,10 @@
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="App Info"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_view_settings"
+        android:title="Settings"
+        android:icon="@android:drawable/ic_menu_edit"
+        app:showAsAction="always" />
 </menu>

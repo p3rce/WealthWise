@@ -21,18 +21,27 @@ import com.example.wealthwise.models.CategoryTotal;
 import com.example.wealthwise.models.Expense;
 import com.example.wealthwise.models.MonthlyTotal;
 import com.example.wealthwise.models.WeeklyTotal;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import android.content.SharedPreferences;
 
 public class DashboardActivity extends AppCompatActivity {
     private Button addExpenseButton, viewAllExpensesButton;
@@ -47,6 +57,7 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView totalAmountTextView;
     private ViewPager2 viewPager, aiAdvicePager;
     private TabLayout tabLayout;
+    private TextView userNameTextView, budgetTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,11 +66,14 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Initialize all views after setting the content view
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
-//        totalAmountTextView = findViewById(R.id.totalAmountTextView);
+        totalAmountTextView = findViewById(R.id.totalAmountTextView);
         addExpenseButton = findViewById(R.id.addExpenseButton);
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
         aiAdvicePager = findViewById(R.id.aiAdvicePager);
+        userNameTextView = userNameTextView = findViewById(R.id.userNameTextView);
+        budgetTextView = findViewById(R.id.budgetTextView);
+
 
         addExpenseButton.setOnClickListener(v -> {
             Intent intent = new Intent(DashboardActivity.this, ExpenseEntryActivity.class);
@@ -68,6 +82,7 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         loadChartData();
+        loadUserSettings();
 
 
         aiAdvicePager.setUserInputEnabled(false);
@@ -96,6 +111,10 @@ public class DashboardActivity extends AppCompatActivity {
         } else if(item.getItemId() == R.id.action_view_info) {
             showInfoDialog();
             return true;
+        } else if (item.getItemId() == R.id.action_view_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -107,8 +126,20 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        calculateTotalAmountSpentThisMonth();
+        calculateTotalAmountSpentThisMonth();
         loadChartData();
+        loadUserSettings();
+    }
+
+
+    private void loadUserSettings() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserSettings", MODE_PRIVATE);
+
+        String name = sharedPreferences.getString("name", "User");
+        float budget = sharedPreferences.getFloat("budget", 0f);
+
+        userNameTextView.setText("Welcome, " + name);
+        budgetTextView.setText("Budget: " + (budget == 0f ? "Not Set" : "$" + (int) budget));
     }
 
 
@@ -117,7 +148,7 @@ public class DashboardActivity extends AppCompatActivity {
         new Thread(() -> {
 
             List<PieEntry> categoryData = getCategoryData();
-            List<PieEntry> monthlyData = getMonthlyData();
+            List<BarEntry> monthlyData = getMonthlyBarData();
 
             runOnUiThread(() -> {
                 ChartPagerAdapter adapter = new ChartPagerAdapter(this, categoryData, monthlyData);
@@ -137,6 +168,8 @@ public class DashboardActivity extends AppCompatActivity {
 
                 }).attach();
 
+//                configureBarChart(monthlyData);
+
             });
 
         }).start();
@@ -155,25 +188,83 @@ public class DashboardActivity extends AppCompatActivity {
         return entries;
     }
 
-    private List<PieEntry> getWeeklyData() {
-        List<WeeklyTotal> weeklyTotals = database.expenseDao().getWeeklyTotal();
-        List<PieEntry> entries = new ArrayList<>();
-        for (WeeklyTotal weeklyTotal : weeklyTotals) {
-            entries.add(new PieEntry((float) weeklyTotal.total, "Week " + weeklyTotal.week));
+//    private List<PieEntry> getWeeklyData() {
+//        List<WeeklyTotal> weeklyTotals = database.expenseDao().getWeeklyTotal();
+//        List<PieEntry> entries = new ArrayList<>();
+//        for (WeeklyTotal weeklyTotal : weeklyTotals) {
+//            entries.add(new PieEntry((float) weeklyTotal.total, "Week " + weeklyTotal.week));
+//        }
+//        return entries;
+//    }
+
+//    private List<PieEntry> getMonthlyData() {
+//        List<MonthlyTotal> monthlyTotals = database.expenseDao().getMonthlyTotal();
+//        List<PieEntry> entries = new ArrayList<>();
+//        for (MonthlyTotal monthlyTotal : monthlyTotals) {
+//            String monthName = getMonthName(monthlyTotal.month);
+//            entries.add(new PieEntry((float) monthlyTotal.total, monthName));
+//        }
+//        return entries;
+//    }
+
+    private List<BarEntry> getMonthlyBarData() {
+
+        List<Expense> expenses = database.expenseDao().getAllExpenses();
+        List<BarEntry> entries = new ArrayList<>();
+
+        for (Expense expense : expenses) {
+
+            try {
+                String[] parts = expense.getDate().split("-");
+                int month = Integer.parseInt(parts[1]);
+
+                entries.add(new BarEntry((float) month, (float) expense.getAmount()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
+
         return entries;
+
     }
 
-    private List<PieEntry> getMonthlyData() {
-        List<MonthlyTotal> monthlyTotals = database.expenseDao().getMonthlyTotal();
-        List<PieEntry> entries = new ArrayList<>();
-        for (MonthlyTotal monthlyTotal : monthlyTotals) {
-            String monthName = getMonthName(monthlyTotal.month);
-            entries.add(new PieEntry((float) monthlyTotal.total, monthName));
-        }
-        return entries;
-    }
 
+    private void configureBarChart(BarChart barChart, List<BarEntry> entries) {
+        if (barChart == null) {
+            throw new IllegalStateException("BarChart is null. Ensure it is initialized properly.");
+        }
+
+        // Set up BarDataSet
+        BarDataSet barDataSet = new BarDataSet(entries, "Monthly Expenses");
+        barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        barDataSet.setValueTextSize(12f);
+
+        // Set up BarData
+        BarData barData = new BarData(barDataSet);
+        barData.setBarWidth(0.8f);
+
+        // Configure BarChart
+        barChart.setData(barData);
+        barChart.getDescription().setEnabled(false);
+        barChart.setDrawGridBackground(false);
+        barChart.animateY(1000);
+        barChart.setFitBars(true);
+
+        // Configure X-axis
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(getMonths()));
+
+        // Configure Y-axis
+        YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setGranularity(10f);
+        leftAxis.setAxisMinimum(0f);
+        barChart.getAxisRight().setEnabled(false);
+
+        barChart.invalidate();
+    }
 
 
 
@@ -292,7 +383,7 @@ public class DashboardActivity extends AppCompatActivity {
                         aiAdvicePager.setCurrentItem(currentPage, true); // Smooth scroll to next item
                     }
                 }
-                aiAdvicePager.postDelayed(this, 5000); // Change advice every 5 seconds
+                aiAdvicePager.postDelayed(this, 10000); // Change advice every 5 seconds
             }
         });
     }
@@ -362,6 +453,11 @@ public class DashboardActivity extends AppCompatActivity {
                 "July", "August", "September", "October", "November", "December"};
         int monthIndex = Integer.parseInt(monthNumber) - 1;
         return (monthIndex >= 0 && monthIndex < 12) ? months[monthIndex] : "Unknown";
+    }
+
+    private List<String> getMonths() {
+        return Arrays.asList("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+
     }
 
     private void displayTotalAmount(double amount) {
