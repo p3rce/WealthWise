@@ -60,6 +60,9 @@ public class DashboardActivity extends AppCompatActivity {
     private TabLayout tabLayout;
     private TextView userNameTextView, budgetTextView;
 
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
+
     private ProgressBar budgetProgressBar;
     private TextView progressBarDetails;
     private float totalBudget;
@@ -95,6 +98,15 @@ public class DashboardActivity extends AppCompatActivity {
         // Fetch and calculate total expenses
         calculateTotalExpenses();
 
+        // Listen for changes in SharedPreferences
+        preferenceChangeListener = (sharedPrefs, key) -> {
+            if ("budget".equals(key)) {
+                totalBudget = sharedPrefs.getFloat("budget", 0f);
+                updateProgressBar();
+            }
+        };
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+
         loadChartData();
         loadUserSettings();
 
@@ -102,6 +114,13 @@ public class DashboardActivity extends AppCompatActivity {
         aiAdvicePager.setUserInputEnabled(false);
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister the listener to avoid memory leaks
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
     @Override
