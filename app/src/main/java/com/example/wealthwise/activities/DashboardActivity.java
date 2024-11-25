@@ -56,7 +56,6 @@ import com.github.mikephil.charting.components.AxisBase;
 public class DashboardActivity extends AppCompatActivity {
     private Button addExpenseButton, viewAllExpensesButton;
     private WealthWiseDatabase database;
-    private TextView totalAmountTextView;
     private ViewPager2 viewPager, aiAdvicePager;
     private TabLayout tabLayout;
     private TextView userNameTextView, budgetTextView;
@@ -73,7 +72,6 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Initialize all views after setting the content view
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
-        totalAmountTextView = findViewById(R.id.totalAmountTextView);
         addExpenseButton = findViewById(R.id.addExpenseButton);
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
@@ -141,9 +139,9 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        calculateTotalAmountSpentThisMonth();
         loadChartData();
         loadUserSettings();
+        calculateTotalExpenses();
     }
 
     private void calculateTotalExpenses() {
@@ -473,45 +471,6 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
 
-
-
-    private void calculateTotalAmountSpentThisMonth() {
-
-        new Thread(() -> {
-
-            List<Expense> expenses = database.expenseDao().getAllExpenses();
-            double totalAmount = 0.0;
-
-            Calendar calendar = Calendar.getInstance();
-            int currentMonth = calendar.get(Calendar.MONTH) + 1;
-            int currentYear = calendar.get(Calendar.YEAR);
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-            for (Expense expense : expenses) {
-
-                try {
-
-                    String[] dateParts = expense.getDate().split("-");
-                    int year = Integer.parseInt(dateParts[0]);
-                    int month = Integer.parseInt(dateParts[1]);
-
-                    if(year == currentYear && month == currentMonth) {
-                        totalAmount += expense.getAmount();
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            double finalTotalAmount = totalAmount;
-            runOnUiThread(() -> displayTotalAmount(finalTotalAmount));
-
-        }).start();
-
-    }
-
     private String getMonthName(String monthNumber) {
         String[] months = {"January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"};
@@ -521,13 +480,6 @@ public class DashboardActivity extends AppCompatActivity {
 
     private List<String> getMonths() {
         return List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
-    }
-
-    private void displayTotalAmount(double amount) {
-        DecimalFormat decimalFormat = new DecimalFormat("0.##");
-        String formattedAmount = "$" + decimalFormat.format(amount);
-
-        totalAmountTextView.setText("Total Amount Spent This Month: " + formattedAmount);
     }
 
     private static class DollarValueFormatter extends ValueFormatter {

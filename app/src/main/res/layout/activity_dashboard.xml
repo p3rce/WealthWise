@@ -68,17 +68,6 @@
             android:layout_height="32dp" />
 
 
-        <TextView
-            android:id="@+id/totalAmountTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="Total Spent This Month: $0.00"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-
         <!-- Button to add a new expense -->
         <Button
             android:id="@+id/addExpenseButton"
