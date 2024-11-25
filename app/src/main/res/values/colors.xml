@@ -8,6 +8,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="light_grey">#E2E2E2</color>
+    <color name="green">#22E228</color>
+    <color name="red">#EEED0D27</color>
 
     <!-- Define colors for chart sections -->
     <!-- Define colors for chart sections -->

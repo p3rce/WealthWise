@@ -31,6 +31,43 @@
             android:layout_width="match_parent"
             android:layout_height="32dp" />
 
+        <!-- Progress Bar Title -->
+        <TextView
+            android:id="@+id/progressBarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spending Progress"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/budgetProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/green"
+            android:backgroundTint="@color/light_grey"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Progress Bar Details -->
+        <TextView
+            android:id="@+id/progressBarDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spent: $0 / $0"
+            android:textSize="16sp" />
+
+
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="32dp" />
+
+
         <TextView
             android:id="@+id/totalAmountTextView"
             android:layout_width="match_parent"
