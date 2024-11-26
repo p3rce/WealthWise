@@ -385,61 +385,60 @@ public class DashboardActivity extends AppCompatActivity {
 
             case "Transportation":
                 adviceList.add("Consider using public transit to save fuel.");
-                adviceList.add("Try carpooling to reduce expenses.");
+                adviceList.add("Try carpooling.");
                 adviceList.add("Walk or bike to save money.");
                 break;
 
             case "Food":
                 adviceList.add("Prepare meals at home instead of dining out.");
-                adviceList.add("Consider buying in bulk to save on groceries.");
-                adviceList.add("Limit takeout meals to cut down on food expenses.");
+                adviceList.add("Consider buying in bulk.");
+                adviceList.add("Limit takeout meals.");
                 break;
             case "Entertainment":
-                adviceList.add("Look for free or low-cost entertainment options.");
-                adviceList.add("Limit subscriptions and memberships to save money.");
-                adviceList.add("Plan home movie nights instead of going to the cinema.");
+                adviceList.add("Look for free or low-cost entertainment.");
+                adviceList.add("Limit subscriptions and memberships.");
+                adviceList.add("Plan home movie nights.");
                 break;
 
             case "Utilities":
-                adviceList.add("Turn off lights and electronics when not in use.");
-                adviceList.add("Switch to energy-efficient appliances to lower utility bills.");
-                adviceList.add("Use programmable thermostats to optimize heating and cooling.");
-                adviceList.add("Consider bundling services (e.g., internet and phone) for discounts.");
+                adviceList.add("Turn off lights and electronics.");
+                adviceList.add("Switch to energy-efficient appliances.");
+                adviceList.add("Use programmable thermostats.");
+                adviceList.add("Consider bundling services for discounts.");
                 break;
 
             case "Household Expenses":
-                adviceList.add("Shop for generic brands to save on household supplies.");
-                adviceList.add("Take advantage of sales and coupons for big savings.");
-                adviceList.add("Avoid impulse buys by creating a shopping list and sticking to it.");
-                adviceList.add("Reuse and recycle items where possible to reduce spending.");
+                adviceList.add("Shop for generic brands.");
+                adviceList.add("Take advantage of sales and coupons.");
+                adviceList.add("Avoid impulse buys.");
+                adviceList.add("Reuse and recycle items where possible.");
                 break;
 
             case "Health":
-                adviceList.add("Explore fitness apps or community resources for free workouts.");
-                adviceList.add("Look for discounts on medications or use generics when available.");
-                adviceList.add("Schedule preventive care visits to avoid costly treatments later.");
-                adviceList.add("Consider switching to an insurance plan that better fits your needs.");
+                adviceList.add("Explore fitness apps for free workouts.");
+                adviceList.add("Look for discounts on medications.");
+                adviceList.add("Schedule preventive care visits.");
                 break;
 
             case "Travel":
-                adviceList.add("Book flights and accommodations in advance for better deals.");
-                adviceList.add("Travel during off-peak times to save on expenses.");
-                adviceList.add("Use loyalty programs or credit card rewards for discounts.");
-                adviceList.add("Consider local or budget-friendly destinations for vacations.");
+                adviceList.add("Book flights and accommodations in advance.");
+                adviceList.add("Travel during off-peak times.");
+                adviceList.add("Use loyalty programs or rewards.");
+                adviceList.add("Consider local destinations to vacations.");
                 break;
 
             case "Shopping":
-                adviceList.add("Wait for sales events like Black Friday or end-of-season sales.");
-                adviceList.add("Compare prices online before making purchases.");
-                adviceList.add("Limit non-essential shopping to reduce impulsive expenses.");
-                adviceList.add("Use cashback or rewards programs for extra savings.");
+                adviceList.add("Wait for sales events.");
+                adviceList.add("Compare prices online.");
+                adviceList.add("Limit non-essential shopping.");
+                adviceList.add("Use cashback / rewards programs.");
                 break;
 
             default:
-                adviceList.add("Analyze your spending habits to identify savings opportunities.");
-                adviceList.add("Set a monthly budget and track your expenses regularly.");
-                adviceList.add("Avoid unnecessary purchases by prioritizing needs over wants.");
-                adviceList.add("Look for ways to reduce subscriptions or recurring expenses.");
+                adviceList.add("Analyze your spending habits.");
+                adviceList.add("Set a monthly budget.");
+                adviceList.add("Avoid unnecessary purchases.");
+                adviceList.add("Look for ways to reduce subscriptions.");
                 break;
 
         }
@@ -464,7 +463,7 @@ public class DashboardActivity extends AppCompatActivity {
                         aiAdvicePager.setCurrentItem(currentPage, true); // Smooth scroll to next item
                     }
                 }
-                aiAdvicePager.postDelayed(this, 10000); // Change advice every 5 seconds
+                aiAdvicePager.postDelayed(this, 15000); // Change advice every 5 seconds
             }
         });
     }
