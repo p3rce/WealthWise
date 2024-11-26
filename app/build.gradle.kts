@@ -46,6 +46,7 @@ dependencies {
 
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.google.mlkit:text-recognition:16.0.0")
 
 
 

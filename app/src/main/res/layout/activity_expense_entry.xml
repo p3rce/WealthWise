@@ -248,5 +248,26 @@
             android:backgroundTint="@color/purple_500"
             android:textColor="@color/white" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="38dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="- or -"
+            android:textAlignment="center"
+            android:textStyle="italic" />
+
+        <Button
+            android:id="@+id/submitExpenseByReciept"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#A9A7AB"
+            android:text="Add Expense by Reciept"
+            android:textColor="@color/white" />
+
     </LinearLayout>
 </ScrollView>

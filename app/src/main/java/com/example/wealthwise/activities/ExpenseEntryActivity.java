@@ -1,7 +1,12 @@
 package com.example.wealthwise.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.view.MenuItem;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -17,6 +23,8 @@ import com.example.wealthwise.R;
 import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -49,11 +57,17 @@ import androidx.cardview.widget.CardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.example.wealthwise.database.WealthWiseDatabase;
 import com.example.wealthwise.models.Expense;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.HashMap;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExpenseEntryActivity extends AppCompatActivity {
 
@@ -64,6 +78,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     private TextInputEditText expenseAmountEditText;
     private WealthWiseDatabase database;
     private HashMap<String, CardView> categoryCards = new HashMap<>();
+
+    private static final int PICK_IMAGE_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +114,104 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         }
 
 
+        Button uploadExpenseByReciept = findViewById(R.id.submitExpenseByReciept);
+        uploadExpenseByReciept.setOnClickListener(v -> openGallery());
+
+
     }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                extractTextFromImage(bitmap); // Automatically extract fields after photo is selected
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to load image!", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void extractTextFromImage(Bitmap bitmap) {
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+
+        TextRecognizer recognizer = TextRecognition.getClient(new com.google.mlkit.vision.text.latin.TextRecognizerOptions.Builder().build());
+
+        recognizer.process(image)
+                .addOnSuccessListener(visionText -> {
+                    String fullText = visionText.getText();
+                    parseReceiptDetails(fullText);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("TextRecognition", "Failed to extract text: ", e);
+                    Toast.makeText(this, "Failed to extract text!", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    private void parseReceiptDetails(String text) {
+        // Regular expressions for dollar amounts and dates
+        String amountPattern = "\\$?([0-9]+\\.[0-9]{2})";
+        String datePattern = "(\\b\\d{1,2}[-/\\s]\\d{1,2}[-/\\s]\\d{2,4}\\b)";
+
+        // Match dollar amounts
+        Pattern amountRegex = Pattern.compile(amountPattern);
+        Matcher amountMatcher = amountRegex.matcher(text);
+
+        double maxAmount = 0.0;
+
+        while (amountMatcher.find()) {
+            String amountStr = amountMatcher.group(1); // Extract numeric value
+            try {
+                double amount = Double.parseDouble(amountStr);
+                if (amount > maxAmount) {
+                    maxAmount = amount; // Update maxAmount if a larger value is found
+                }
+            } catch (NumberFormatException e) {
+                Log.e("ReceiptParsing", "Error parsing amount: " + amountStr, e);
+            }
+        }
+
+        // Match dates
+        Pattern dateRegex = Pattern.compile(datePattern);
+        Matcher dateMatcher = dateRegex.matcher(text);
+        String rawDate = null;
+        if (dateMatcher.find()) {
+            rawDate = dateMatcher.group(1); // Extract the first matching date
+        }
+
+        // Format date to "yyyy-MM-dd" if possible
+        String formattedDate = "Invalid Date";
+        if (rawDate != null) {
+            try {
+                SimpleDateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = inputFormat.parse(rawDate.replace(" ", "/").replace("-", "/"));
+                formattedDate = outputFormat.format(date);
+            } catch (ParseException e) {
+                Log.e("DateParsing", "Error parsing date: " + rawDate, e);
+            }
+        }
+
+        // Populate the fields
+        double finalMaxAmount = maxAmount;
+        String finalFormattedDate = formattedDate;
+        runOnUiThread(() -> {
+            expenseAmountEditText.setText(finalMaxAmount > 0 ? String.format("%.2f", finalMaxAmount) : "");
+            selectedDate = finalFormattedDate;
+            selectDateButton.setText(selectedDate); // Update the button's text with the selected date
+        });
+    }
+
 
 
     @Override
