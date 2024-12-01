@@ -23,20 +23,20 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        // Initialize SharedPreferences
+
         sharedPreferences = getSharedPreferences("UserSettings", MODE_PRIVATE);
 
         nameEditText = findViewById(R.id.nameEditText);
         budgetSlider = findViewById(R.id.budgetSlider);
         saveButton = findViewById(R.id.saveButton);
 
-        // Load saved values
+
         loadSettings();
 
-        // Save settings when the button is clicked
+
         saveButton.setOnClickListener(v -> saveSettings());
 
-        // Enable back button
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Settings");
@@ -48,7 +48,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish(); // Navigate back to the previous activity
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -71,7 +71,8 @@ public class SettingsActivity extends AppCompatActivity {
             return;
         }
 
-        // Save to SharedPreferences
+
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("name", name);
         editor.putFloat("budget", budget);

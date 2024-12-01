@@ -70,10 +70,8 @@ public class ExpenseListActivity extends AppCompatActivity {
             List<Expense> expenses = database.expenseDao().getAllExpenses();
             runOnUiThread(() -> {
                 if (expenses.isEmpty()) {
-//                    noExpensesTextView.setVisibility(View.VISIBLE);
                     expenseRecyclerView.setVisibility(View.GONE);
                 } else {
-//                    noExpensesTextView.setVisibility(View.GONE);
                     expenseRecyclerView.setVisibility(View.VISIBLE);
                     expenseAdapter = new ExpenseAdapter(expenses, database);
                     expenseRecyclerView.setAdapter(expenseAdapter);

@@ -53,29 +53,31 @@ public class BarChartFragment extends Fragment {
     }
 
     private void configureBarChart(BarChart barChart) {
-        // Set up BarDataSet
+
+
         BarDataSet barDataSet = new BarDataSet(barEntries, "Monthly Expenses");
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         barDataSet.setValueTextSize(12f);
 
-        // Set up BarData
+
         BarData barData = new BarData(barDataSet);
         barData.setBarWidth(0.8f);
 
-        // Configure BarChart
+
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
         barChart.animateY(1000);
         barChart.setFitBars(true);
 
-        // Configure X-axis
+
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(getMonths()));
 
-        // Configure Y-axis
+
+
         YAxis leftAxis = barChart.getAxisLeft();
         leftAxis.setGranularity(10f);
         leftAxis.setAxisMinimum(0f);

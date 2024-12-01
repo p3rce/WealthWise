@@ -27,14 +27,14 @@ public class ChartPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         if (position == 0) {
-            return ChartFragment.newInstance("", categoryData); // Pie Chart
+            return ChartFragment.newInstance("", categoryData);
         } else {
-            return BarChartFragment.newInstance(monthlyData); // Bar Chart
+            return BarChartFragment.newInstance(monthlyData);
         }
     }
 
     @Override
     public int getItemCount() {
-        return 2; // Number of charts
+        return 2;
     }
 }

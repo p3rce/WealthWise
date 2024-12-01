@@ -54,6 +54,8 @@ import android.content.SharedPreferences;
 import com.github.mikephil.charting.components.AxisBase;
 
 public class DashboardActivity extends AppCompatActivity {
+
+
     private Button addExpenseButton, viewAllExpensesButton;
     private WealthWiseDatabase database;
     private ViewPager2 viewPager, aiAdvicePager;
@@ -71,9 +73,9 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_dashboard);  // Ensure this is called first
+        setContentView(R.layout.activity_dashboard);
 
-        // Initialize all views after setting the content view
+
         database = WealthWiseDatabase.getDatabase(getApplicationContext());
         addExpenseButton = findViewById(R.id.addExpenseButton);
         viewPager = findViewById(R.id.viewPager);
@@ -91,14 +93,14 @@ public class DashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Load budget from SharedPreferences
+
         SharedPreferences sharedPreferences = getSharedPreferences("UserSettings", MODE_PRIVATE);
         totalBudget = sharedPreferences.getFloat("budget", 0f);
 
-        // Fetch and calculate total expenses
+
         calculateTotalExpenses();
 
-        // Listen for changes in SharedPreferences
+
         preferenceChangeListener = (sharedPrefs, key) -> {
             if ("budget".equals(key)) {
                 totalBudget = sharedPrefs.getFloat("budget", 0f);
@@ -119,7 +121,7 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unregister the listener to avoid memory leaks
+
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
     }
 
@@ -168,19 +170,19 @@ public class DashboardActivity extends AppCompatActivity {
             List<Expense> expenses = database.expenseDao().getAllExpenses();
             totalExpenses = 0f;
 
-            // Get current month and year
+
             Calendar calendar = Calendar.getInstance();
-            int currentMonth = calendar.get(Calendar.MONTH) + 1; // Calendar.MONTH is zero-based
+            int currentMonth = calendar.get(Calendar.MONTH) + 1;
             int currentYear = calendar.get(Calendar.YEAR);
 
             for (Expense expense : expenses) {
                 try {
-                    // Parse the expense date (assuming format "yyyy-MM-dd")
+
                     String[] parts = expense.getDate().split("-");
                     int expenseYear = Integer.parseInt(parts[0]);
                     int expenseMonth = Integer.parseInt(parts[1]);
 
-                    // Add expense amount if it matches the current month and year
+
                     if (expenseYear == currentYear && expenseMonth == currentMonth) {
                         totalExpenses += expense.getAmount();
                     }
@@ -189,21 +191,22 @@ public class DashboardActivity extends AppCompatActivity {
                 }
             }
 
-            // Update UI on the main thread
+
             runOnUiThread(() -> updateProgressBar());
         }).start();
     }
 
 
     private void updateProgressBar() {
-        // Set max to budget and progress to total expenses
+
+
         budgetProgressBar.setMax((int) totalBudget);
         budgetProgressBar.setProgress((int) totalExpenses);
 
-        // Update details text
+
         progressBarDetails.setText(String.format("Spent: $%.2f / $%.2f", totalExpenses, totalBudget));
 
-        // Change progress bar color based on spending
+
         if (totalExpenses / totalBudget <= 0.5) {
             budgetProgressBar.setProgressTintList(getColorStateList(R.color.green));
         } else if (totalExpenses / totalBudget <= 0.8) {
@@ -268,8 +271,8 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private List<BarEntry> getMonthlyBarData() {
-        List<Expense> expenses = database.expenseDao().getAllExpenses(); // Retrieve all expenses
-        Map<Integer, Float> monthTotals = new HashMap<>(); // Map to store totals for each month
+        List<Expense> expenses = database.expenseDao().getAllExpenses();
+        Map<Integer, Float> monthTotals = new HashMap<>();
 
         for (Expense expense : expenses) {
             try {
@@ -277,7 +280,7 @@ public class DashboardActivity extends AppCompatActivity {
                 String[] parts = expense.getDate().split("-");
                 int month = Integer.parseInt(parts[1]);
 
-                float currentAmount = (float) expense.getAmount(); // Convert to float
+                float currentAmount = (float) expense.getAmount();
                 monthTotals.put(month, monthTotals.getOrDefault(month, 0f) + currentAmount);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -286,7 +289,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         List<BarEntry> entries = new ArrayList<>();
         for (Map.Entry<Integer, Float> entry : monthTotals.entrySet()) {
-            int month = entry.getKey() - 1; // Convert 1-based month to 0-based index for the BarChart
+            int month = entry.getKey() - 1;
             entries.add(new BarEntry(month, entry.getValue()));
         }
 
@@ -295,56 +298,57 @@ public class DashboardActivity extends AppCompatActivity {
 
 
     private void configureBarChart(BarChart barChart, List<BarEntry> entries) {
-        // Set up BarDataSet
+
+
         BarDataSet barDataSet = new BarDataSet(entries, "Monthly Expenses");
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         barDataSet.setValueTextSize(12f);
 
-        // Add a $ sign to the numbers displayed on top of each bar
+
         barDataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
                 if (Math.floor(value) == value) {
-                    return "$" + (int) value; // Display as integer
+                    return "$" + (int) value;
                 } else {
-                    return "$" + String.format("%.2f", value); // Display as float with two decimal places
+                    return "$" + String.format("%.2f", value);
                 }
             }
         });
 
-        // Set up BarData
+
         BarData barData = new BarData(barDataSet);
         barData.setBarWidth(0.8f);
 
-        // Configure BarChart
+
         barChart.setData(barData);
         barChart.getDescription().setEnabled(false);
         barChart.setDrawGridBackground(false);
         barChart.animateY(1000);
         barChart.setFitBars(true);
 
-        // Customize Y-axis
-        YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setGranularity(10f); // Granularity for ticks
-        leftAxis.setAxisMinimum(0f); // Start Y-axis at zero
 
-        // Add a $ sign to the Y-axis labels
+        YAxis leftAxis = barChart.getAxisLeft();
+        leftAxis.setGranularity(10f);
+        leftAxis.setAxisMinimum(0f);
+
+
         leftAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getAxisLabel(float value, AxisBase axis) {
-                return "$" + (int) value; // Display as integer on the Y-axis
+                return "$" + (int) value;
             }
         });
 
-        barChart.getAxisRight().setEnabled(false); // Disable the right Y-axis
+        barChart.getAxisRight().setEnabled(false);
 
-        // Customize X-axis
+
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f); // One month per tick
+        xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(getMonths()));
 
-        barChart.invalidate(); // Refresh the chart
+        barChart.invalidate();
     }
 
 
@@ -353,23 +357,23 @@ public class DashboardActivity extends AppCompatActivity {
         List<String> adviceList;
 
         if (entries.isEmpty()) {
-            // No expenses are loaded, use default advice
+
             adviceList = generateAdviceForCategory("default");
         } else {
-            // Sort entries by expense amount to find the top category
+
             entries.sort((entry1, entry2) -> Float.compare(entry2.getValue(), entry1.getValue()));
             String topCategory = entries.get(0).getLabel();
 
-            // Generate advice based on the highest expense category
+
             adviceList = generateAdviceForCategory(topCategory);
         }
 
-        // Set adapter on the main thread
+
         runOnUiThread(() -> {
             AdvicePageAdapter adviceAdapter = new AdvicePageAdapter(this, adviceList);
             aiAdvicePager.setAdapter(adviceAdapter);
 
-            // Start auto-cycle only after adapter is set
+
             startAdviceAutoCycle();
         });
     }
@@ -455,15 +459,15 @@ public class DashboardActivity extends AppCompatActivity {
 
             @Override
             public void run() {
-                // Ensure adapter is set before accessing it
+
                 if (aiAdvicePager.getAdapter() != null) {
                     int itemCount = aiAdvicePager.getAdapter().getItemCount();
                     if (itemCount > 0) {
                         currentPage = (currentPage + 1) % itemCount;
-                        aiAdvicePager.setCurrentItem(currentPage, true); // Smooth scroll to next item
+                        aiAdvicePager.setCurrentItem(currentPage, true);
                     }
                 }
-                aiAdvicePager.postDelayed(this, 15000); // Change advice every 5 seconds
+                aiAdvicePager.postDelayed(this, 15000);
             }
         });
     }

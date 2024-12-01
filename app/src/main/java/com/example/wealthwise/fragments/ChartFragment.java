@@ -56,7 +56,7 @@ public class ChartFragment extends Fragment {
         PieChart pieChart = view.findViewById(R.id.chart);
 
         chartTitle.setText(title);
-        configurePieChart(pieChart); // Custom method to configure the chart
+        configurePieChart(pieChart);
 
         loadChartData(pieChart);
 
@@ -64,28 +64,30 @@ public class ChartFragment extends Fragment {
     }
 
     private void configurePieChart(PieChart pieChart) {
-        // Disable percentage values
+
         pieChart.setUsePercentValues(false);
 
-        // Disable description text on the chart
+
         pieChart.getDescription().setEnabled(false);
 
-        // Remove hole in the center of the pie chart
+
         pieChart.setDrawHoleEnabled(false);
 
-        // Set entry label text size and color
+
         pieChart.setEntryLabelTextSize(14f);
         pieChart.setEntryLabelColor(getResources().getColor(android.R.color.white));
 
-        // Customize the legend (optional: disable it if desired)
+
+
         Legend legend = pieChart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         legend.setDrawInside(false);
-        legend.setEnabled(false);  // Disable if you don’t want the legend
+        legend.setEnabled(false);
 
-        // Add animations
+
+
         pieChart.animateY(1000);
     }
 

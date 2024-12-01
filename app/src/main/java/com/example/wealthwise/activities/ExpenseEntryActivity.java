@@ -71,8 +71,8 @@ import java.util.regex.Pattern;
 
 public class ExpenseEntryActivity extends AppCompatActivity {
 
-    private String selectedCategory = null; // Holds the selected category
-    private CardView currentlySelectedCard = null; // Tracks the currently selected card
+    private String selectedCategory = null;
+    private CardView currentlySelectedCard = null;
     private Button selectDateButton;
     private String selectedDate;
     private TextInputEditText expenseAmountEditText;
@@ -86,21 +86,21 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_entry);
 
-        database = WealthWiseDatabase.getDatabase(this); // Initialize the database
+        database = WealthWiseDatabase.getDatabase(this);
         expenseAmountEditText = findViewById(R.id.expenseAmount);
         selectDateButton = findViewById(R.id.selectDateButton);
 
-        // Initialize category selection
+
         setupCategorySelection();
 
-        // Set default date to today
+
         selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().getTime());
         selectDateButton.setText(selectedDate);
 
-        // Open Date Picker when the button is clicked
+
         selectDateButton.setOnClickListener(v -> showDatePickerDialog());
 
-        // Submit Button Logic
+
         findViewById(R.id.submitExpense).setOnClickListener(v -> {
             if (validateInput()) {
                 addExpenseToDatabase();
@@ -133,7 +133,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
             Uri imageUri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                extractTextFromImage(bitmap); // Automatically extract fields after photo is selected
+                extractTextFromImage(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to load image!", Toast.LENGTH_SHORT).show();
@@ -159,37 +159,40 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
 
     private void parseReceiptDetails(String text) {
-        // Regular expressions for dollar amounts and dates
+
+
         String amountPattern = "\\$?([0-9]+\\.[0-9]{2})";
         String datePattern = "(\\b\\d{1,2}[-/\\s]\\d{1,2}[-/\\s]\\d{2,4}\\b)";
 
-        // Match dollar amounts
+
         Pattern amountRegex = Pattern.compile(amountPattern);
         Matcher amountMatcher = amountRegex.matcher(text);
 
         double maxAmount = 0.0;
 
         while (amountMatcher.find()) {
-            String amountStr = amountMatcher.group(1); // Extract numeric value
+            String amountStr = amountMatcher.group(1);
             try {
                 double amount = Double.parseDouble(amountStr);
                 if (amount > maxAmount) {
-                    maxAmount = amount; // Update maxAmount if a larger value is found
+                    maxAmount = amount;
                 }
             } catch (NumberFormatException e) {
                 Log.e("ReceiptParsing", "Error parsing amount: " + amountStr, e);
             }
         }
 
-        // Match dates
+
+
         Pattern dateRegex = Pattern.compile(datePattern);
         Matcher dateMatcher = dateRegex.matcher(text);
         String rawDate = null;
         if (dateMatcher.find()) {
-            rawDate = dateMatcher.group(1); // Extract the first matching date
+            rawDate = dateMatcher.group(1);
         }
 
-        // Format date to "yyyy-MM-dd" if possible
+
+
         String formattedDate = "Invalid Date";
         if (rawDate != null) {
             try {
@@ -202,13 +205,14 @@ public class ExpenseEntryActivity extends AppCompatActivity {
             }
         }
 
-        // Populate the fields
+
+
         double finalMaxAmount = maxAmount;
         String finalFormattedDate = formattedDate;
         runOnUiThread(() -> {
             expenseAmountEditText.setText(finalMaxAmount > 0 ? String.format("%.2f", finalMaxAmount) : "");
             selectedDate = finalFormattedDate;
-            selectDateButton.setText(selectedDate); // Update the button's text with the selected date
+            selectDateButton.setText(selectedDate);
         });
     }
 
@@ -217,7 +221,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            finish(); // Go back to the previous activity
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -229,10 +233,10 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, year, month, dayOfMonth) -> {
-                    // Update selectedDate with the chosen date
+
                     calendar.set(year, month, dayOfMonth);
                     selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.getTime());
-                    selectDateButton.setText(selectedDate); // Update the button text
+                    selectDateButton.setText(selectedDate);
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -251,7 +255,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         categoryCards.put("Health", findViewById(R.id.healthCard));
         categoryCards.put("Travel", findViewById(R.id.travelCard));
         categoryCards.put("Shopping", findViewById(R.id.shoppingCard));
-        // Add more categories as needed
+
+
 
         for (String category : categoryCards.keySet()) {
             CardView cardView = categoryCards.get(category);
@@ -262,19 +267,21 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
     private void toggleCategorySelection(String category, CardView selectedCard) {
         if (currentlySelectedCard == selectedCard) {
-            // Deselect the card if it's already selected
+
+
             deselectCurrentCategory();
         } else {
-            // Select a new category
+
+
             selectCategory(category, selectedCard);
         }
     }
 
 
     private void selectCategory(String category, CardView selectedCard) {
-        deselectCurrentCategory(); // Reset any previously selected card
+        deselectCurrentCategory();
 
-        selectedCard.setCardBackgroundColor(getResources().getColor(R.color.light_grey)); // Highlight selected card
+        selectedCard.setCardBackgroundColor(getResources().getColor(R.color.light_grey));
         selectedCategory = category;
         currentlySelectedCard = selectedCard;
     }
@@ -310,21 +317,23 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         String amountText = expenseAmountEditText.getText().toString().trim();
         float amount = Float.parseFloat(amountText);
 
-        // Get the current date
 
-        // Create a new expense object using the default constructor
+
+
+
         Expense expense = new Expense();
         expense.setAmount(amount);
         expense.setCategory(selectedCategory);
         expense.setDate(selectedDate);
 
-        // Insert into the database
+
+
         new Thread(() -> {
             database.expenseDao().insert(expense);
 
             runOnUiThread(() -> {
                 Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show();
-                finish(); // Close the activity after successful submission
+                finish();
             });
         }).start();
     }
