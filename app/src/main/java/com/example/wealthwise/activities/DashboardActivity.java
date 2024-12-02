@@ -243,11 +243,11 @@ public class DashboardActivity extends AppCompatActivity {
 
                     switch (position) {
                         case 0:
-                            tab.setText("By-Category");
+                            tab.setText(getString(R.string.by_category));
                             break;
 
                         case 1:
-                            tab.setText("By-Month");
+                            tab.setText(getString(R.string.by_month));
                             break;
                     }
 
@@ -300,7 +300,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void configureBarChart(BarChart barChart, List<BarEntry> entries) {
 
 
-        BarDataSet barDataSet = new BarDataSet(entries, "Monthly Expenses");
+        BarDataSet barDataSet = new BarDataSet(entries, getString(R.string.monthly_expenses));
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         barDataSet.setValueTextSize(12f);
 
@@ -478,7 +478,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void showInfoDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("App Information");
+        builder.setTitle(getString(R.string.app_information));
         builder.setMessage("Author: Pierce Goulimis\n" +
 
                 "Version: ALPHA\n\n" +

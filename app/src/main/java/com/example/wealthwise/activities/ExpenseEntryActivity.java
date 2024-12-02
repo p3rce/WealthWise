@@ -110,7 +110,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Add Expense");
+            getSupportActionBar().setTitle(getString(R.string.add_expense));
         }
 
 
@@ -193,7 +193,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
 
 
-        String formattedDate = "Invalid Date";
+        String formattedDate = getString(R.string.invalid_date);
+
         if (rawDate != null) {
             try {
                 SimpleDateFormat inputFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
@@ -247,6 +248,8 @@ public class ExpenseEntryActivity extends AppCompatActivity {
 
 
     private void setupCategorySelection() {
+
+
         categoryCards.put("Transportation", findViewById(R.id.transportationCard));
         categoryCards.put("Food", findViewById(R.id.foodCard));
         categoryCards.put("Entertainment", findViewById(R.id.entertainmentCard));
@@ -300,12 +303,12 @@ public class ExpenseEntryActivity extends AppCompatActivity {
         String amountText = expenseAmountEditText.getText().toString().trim();
 
         if (amountText.isEmpty()) {
-            Toast.makeText(this, "Please enter an expense amount", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.enter_expense_amount), Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (selectedCategory == null) {
-            Toast.makeText(this, "Please select an expense category", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.select_expense_category), Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -332,7 +335,7 @@ public class ExpenseEntryActivity extends AppCompatActivity {
             database.expenseDao().insert(expense);
 
             runOnUiThread(() -> {
-                Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.expense_added_success), Toast.LENGTH_SHORT).show();
                 finish();
             });
         }).start();

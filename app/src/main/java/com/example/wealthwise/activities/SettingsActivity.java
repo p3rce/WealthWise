@@ -39,7 +39,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Settings");
+            getSupportActionBar().setTitle(getString(R.string.settings_title));
         }
 
 
@@ -67,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
         float budget = budgetSlider.getValue();
 
         if (name.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putFloat("budget", budget);
         editor.apply();
 
-        Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.settings_saved), Toast.LENGTH_SHORT).show();
         finish();
     }
 }

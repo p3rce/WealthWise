@@ -7,6 +7,28 @@
     <string name="save_expense">Save Expense</string>
 
 
+    <!-- Dashboard Activity -->
+    <string name="by_category">By-Category</string>
+    <string name="by_month">By-Month</string>
+    <string name="monthly_expenses">Monthly Expenses</string>
+    <string name="app_information">App Information</string>
+
+
+    <!-- Expense Entry -->
+    <string name="add_expense">Add Expense</string>
+    <string name="invalid_date">Invalid Date</string>
+    <string name="enter_expense_amount">Please enter an expense amount</string>
+    <string name="select_expense_category">Please select an expense category</string>
+    <string name="expense_added_success">Expense added successfully</string>
+
+
+    <!-- Settings Activity -->
+    <string name="settings_title">Settings</string>
+    <string name="fill_all_fields">Please fill in all fields</string>
+    <string name="settings_saved">Settings saved</string>
+
+
+
     <!-- Expense Categories -->
     <string-array name="expense_categories">
         <item>Entertainment</item>
